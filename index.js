@@ -27,7 +27,12 @@ async function run() {
 
     // get all services from database
     app.get('/services', async (req, res) => {
-      const result = await servicesCollection.find().toArray();
+      let query = {};
+      const email = req.query.email;
+      if (email) {
+        query = { email: email };
+      }
+      const result = await servicesCollection.find(query).toArray();
       res.send(result);
     });
 
