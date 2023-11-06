@@ -21,6 +21,15 @@ async function run() {
   try {
     await client.connect();
 
+    const serviceSwapCenter = client.db('serviceSwapCenter');
+    const servicesCollection = serviceSwapCenter.collection('services');
+
+    // get all services from database
+    app.get('/services', async (req, res) => {
+      const result = await servicesCollection.find().toArray();
+      res.send(result);
+    });
+
     await client.db('admin').command({ ping: 1 });
     console.log(
       'Pinged your deployment. You successfully connected to MongoDB!'
