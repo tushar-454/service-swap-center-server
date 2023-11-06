@@ -23,6 +23,7 @@ async function run() {
 
     const serviceSwapCenter = client.db('serviceSwapCenter');
     const servicesCollection = serviceSwapCenter.collection('services');
+    const bookingCollection = serviceSwapCenter.collection('booking');
 
     // get all services from database
     app.get('/services', async (req, res) => {
@@ -42,6 +43,13 @@ async function run() {
     app.post('/services', async (req, res) => {
       const serviceData = req.body;
       const result = await servicesCollection.insertOne(serviceData);
+      res.send(result);
+    });
+
+    // add booked data in database
+    app.post('/booking', async (req, res) => {
+      const bookedData = req.body;
+      const result = await bookingCollection.insertOne(bookedData);
       res.send(result);
     });
 
