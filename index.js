@@ -105,6 +105,15 @@ async function run() {
       res.send(result);
     });
 
+    // delete user added bookedData from database
+    app.delete('/booking', async (req, res) => {
+      const whoBookedEmail = req.query.whoBooked;
+      const id = req.query.id;
+      const query = { _id: new ObjectId(id), whoBooked: whoBookedEmail };
+      const result = await bookingCollection.deleteOne(query);
+      res.send(result);
+    });
+
     await client.db('admin').command({ ping: 1 });
     console.log(
       'Pinged your deployment. You successfully connected to MongoDB!'
