@@ -79,7 +79,7 @@ async function run() {
     });
 
     // get one service by id from database
-    app.get('/service/:id', async (req, res) => {
+    app.get('/service/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await servicesCollection.find(query).toArray();
@@ -87,14 +87,14 @@ async function run() {
     });
 
     // post a service in database
-    app.post('/services', async (req, res) => {
+    app.post('/services', verifyToken, async (req, res) => {
       const serviceData = req.body;
       const result = await servicesCollection.insertOne(serviceData);
       res.send(result);
     });
 
     // add booked data in database
-    app.post('/booking', async (req, res) => {
+    app.post('/booking', verifyToken, async (req, res) => {
       const bookedData = req.body;
       const result = await bookingCollection.insertOne(bookedData);
       res.send(result);
@@ -116,7 +116,7 @@ async function run() {
     });
 
     // delete user added service by uid
-    app.delete('/services/:id', async (req, res) => {
+    app.delete('/services/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const result = await servicesCollection.deleteOne({
         _id: new ObjectId(id),
@@ -125,9 +125,12 @@ async function run() {
     });
 
     // update service by service id
-    app.put('/service/:id', async (req, res) => {
+    app.put('/service/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const getupdatedDoc = req.body;
+      if (req.user.email !== getupdatedDoc.email) {
+        return res.status(403).send({ message: 'Forbidden Access' });
+      }
       const updatedDoc = {
         $set: {
           email: getupdatedDoc.email,
