@@ -44,6 +44,13 @@ async function run() {
       res.send({ success: true });
     });
 
+    // api for delete token
+    app.post('/jwtremove', async (req, res) => {
+      const user = req.body;
+      res.clearCookie('token', { maxAge: 0 });
+      res.send({ success: true });
+    });
+
     // get all services from database
     app.get('/services', async (req, res) => {
       let query = {};
