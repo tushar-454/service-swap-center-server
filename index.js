@@ -1,6 +1,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const app = express();
+const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const cors = require('cors');
@@ -8,12 +9,27 @@ const port = process.env.port || 5000;
 
 // middleware
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: ['http://localhost:5173'],
     credentials: true,
   })
 );
+
+const verifyToken = (req, res, next) => {
+  const token = req?.cookies?.token;
+  if (!token) {
+    return res.status(401).send({ message: 'Unauthorized Access' });
+  }
+  jwt.verify(token, process.env.SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: 'Unauthorized Access' });
+    }
+    req.user = decoded;
+    next();
+  });
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@service-swap-center.0rpazty.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -85,9 +101,12 @@ async function run() {
     });
 
     // get booking data based on user email
-    app.get('/booking', async (req, res) => {
+    app.get('/booking', verifyToken, async (req, res) => {
       const email = req.query.email;
       const type = req.query.type;
+      if (req.user.email !== email) {
+        return res.status(403).send({ message: 'Forbidden Access' });
+      }
       let query = {};
       if (email && type) {
         query = { [type]: email };
@@ -144,7 +163,6 @@ async function run() {
     app.put('/booking', async (req, res) => {
       const id = req.query.id;
       const updatedStatus = req.body.status;
-      console.log(updatedStatus);
       const query = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
