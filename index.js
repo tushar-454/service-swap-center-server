@@ -4,6 +4,14 @@ const app = express();
 require('dotenv').config();
 const cors = require('cors');
 const port = process.env.port || 5000;
+
+// middleware
+const corsConfig = {
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+};
+
 // middleware
 app.use(express.json());
 app.use(cors());
@@ -19,7 +27,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const serviceSwapCenter = client.db('serviceSwapCenter');
     const servicesCollection = serviceSwapCenter.collection('services');
