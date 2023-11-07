@@ -1,20 +1,19 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const app = express();
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const cors = require('cors');
 const port = process.env.port || 5000;
 
 // middleware
-const corsConfig = {
-  origin: '*',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-};
-
-// middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ['http://localhost:5173'],
+    credentials: true,
+  })
+);
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@service-swap-center.0rpazty.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -32,6 +31,18 @@ async function run() {
     const serviceSwapCenter = client.db('serviceSwapCenter');
     const servicesCollection = serviceSwapCenter.collection('services');
     const bookingCollection = serviceSwapCenter.collection('booking');
+
+    // jwt api authentication api
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.SECRET, { expiresIn: '1h' });
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: false,
+      });
+      res.send({ success: true });
+    });
 
     // get all services from database
     app.get('/services', async (req, res) => {
