@@ -12,8 +12,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: 'https://service-swap-center.web.app',
+    origin: ['http://localhost:5173', 'https://service-swap-center.web.app'],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   })
 );
 
@@ -55,7 +56,7 @@ async function run() {
       res.cookie('token', token, {
         httpOnly: true,
         secure: true,
-        sameSite: false,
+        sameSite: 'none',
       });
       res.send({ success: true });
     });
@@ -63,7 +64,11 @@ async function run() {
     // api for delete token
     app.post('/jwtremove', async (req, res) => {
       const user = req.body;
-      res.clearCookie('token', { maxAge: 0 });
+      res.clearCookie('token', {
+        maxAge: 0,
+        secure: true,
+        sameSite: 'none',
+      });
       res.send({ success: true });
     });
 
